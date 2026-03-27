@@ -1,0 +1,488 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빡코딩 스터디 | 서울 대학생 코딩 아지트</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --point-color: #ff4500; /* 로고의 불꽃색 */
+            --text-main: #ffffff;
+            --text-sub: #8b949e;
+            --border-color: #30363d;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            margin: 0;
+            line-height: 1.7;
+            word-break: keep-all;
+        }
+
+        .container { width: 90%; max-width: 1000px; margin: 0 auto; padding: 60px 0; }
+
+        /* Header Section */
+        header { 
+            text-align: center; 
+            padding: 120px 0 80px 0; 
+            background: radial-gradient(circle at top, #1c2128 0%, #0d1117 70%);
+        }
+        .logo-img { width: 180px; height: auto; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.4)); }
+        h1 { font-size: 3.5rem; margin: 0; letter-spacing: -2px; }
+        .slogan { font-size: 1.4rem; color: var(--text-sub); margin: 15px 0 40px; font-weight: 300; }
+        
+        /* Buttons */
+        .btn-group { display: flex; justify-content: center; gap: 15px; }
+        .btn { padding: 16px 32px; border-radius: 8px; font-weight: bold; text-decoration: none; transition: 0.3s; font-size: 1.1rem; }
+        .btn-primary { background: var(--point-color); color: white; border: none; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255, 69, 0, 0.4); }
+        .btn-outline { border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { background: var(--card-bg); border-color: var(--text-sub); }
+
+        /* Section Styling */
+        .section-title { 
+            font-size: 2rem; 
+            margin-bottom: 40px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        .section-title::before { content: ''; width: 6px; height: 30px; background: var(--point-color); border-radius: 3px; }
+
+        /* Grid Layouts */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 60px; }
+        .card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+        .card:hover { border-color: var(--point-color); }
+        .card h3 { margin-top: 0; color: var(--point-color); display: flex; align-items: center; gap: 8px; }
+
+        /* 애니메이션을 위한 기본 스타일 */
+        .animate-on-scroll {
+            opacity: 0; /* 처음에 투명하게 */
+            transform: translateY(30px); /* 살짝 아래에 위치 */
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* 부드러운 전환 효과 */
+        }
+
+        /* 애니메이션이 발동했을 때 스타일 (JS가 이 클래스를 추가함) */
+        .animate-on-scroll.appear {
+            opacity: 1; /* 보이게 */
+            transform: translateY(0); /* 제자리로 */
+        }
+
+        /* 카드들에 딜레이 효과를 주어 순서대로 나타나게 함 */
+        .grid .card:nth-child(1) { transition-delay: 0.1s; }
+        .grid .card:nth-child(2) { transition-delay: 0.3s; }
+        .grid .card:nth-child(3) { transition-delay: 0.5s; } /* 만약 카드가 3개라면 */
+
+        /* Warning Section */
+        .warning-box {
+            background: rgba(255, 69, 0, 0.05);
+            border: 1px dashed var(--point-color);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+        .warning-box h3 { color: #ff6b6b; margin-top: 0; }
+        .warning-list { list-style: none; padding: 0; }
+        .warning-list li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+        .warning-list li::before { content: '⛔'; position: absolute; left: 0; }
+
+        /* Footer */
+        footer { text-align: center; padding: 60px 0; border-top: 1px solid var(--border-color); color: #484f58; font-size: 0.9rem; }
+        
+        /* Highlight text */
+        .highlight { color: var(--point-color); font-weight: bold; }
+
+        /* 타이머 스타일 추가 */
+        .timer-container {
+            margin-bottom: 40px;
+            background: rgba(255, 69, 0, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            border: 1px solid rgba(255, 69, 0, 0.3);
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: var(--point-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #countdown {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .time-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-unit span {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums; /* 숫자가 변해도 너비 고정 */
+        }
+
+        .time-unit small {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        /* 후기 섹션 전용 스타일 */
+        .testimonial-card {
+            border-top: 3px solid var(--point-color); /* 상단 포인트 선 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--point-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .name {
+            display: block;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .tag {
+            font-size: 0.8rem;
+            color: var(--point-color);
+            background: rgba(255, 69, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .comment {
+            font-style: italic;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+            padding-top: 10px;
+        }
+
+        .comment::before {
+            content: '"';
+            font-size: 2rem;
+            color: rgba(255, 69, 0, 0.2);
+            position: absolute;
+            top: -10px;
+            left: -5px;
+        }
+
+        /* 갤러리 섹션 전용 스타일 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* 반응형 그리드 */
+            gap: 25px;
+            margin-bottom: 80px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden; /* 이미지가 둥근 모서리를 벗어나지 않도록 */
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px); /* 살짝 위로 띄우는 효과 */
+            box-shadow: 0 10px 25px rgba(255, 69, 0, 0.3); /* 오렌지색 그림자 */
+            border-color: var(--point-color);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 이미지가 비율을 유지하며 가득 차도록 */
+            transition: transform 0.3s ease; /* 호버 시 이미지 확대 효과 */
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05); /* 부드럽게 확대 */
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0) 100%); /* 하단 그라데이션 */
+            color: white;
+            opacity: 0; /* 평소에는 숨김 */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px); /* 살짝 아래에 위치 */
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1; /* 호버 시 보임 */
+            transform: translateY(0); /* 제자리로 */
+        }
+
+        .gallery-tag {
+            font-size: 0.8rem;
+            color: var(--point-color);
+            background: rgba(255, 69, 0, 0.1);
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .gallery-overlay h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.3rem;
+            letter-spacing: -1px;
+        }
+
+        .gallery-overlay p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            line-height: 1.4;
+}
+
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="{% static 'study/logo.png' %}" alt="빡코딩 로고" class="logo-img">
+    <h1><span class="highlight">빡</span>코딩 스터디 2기</h1>
+    <p class="slogan">"서울 대학생들의 빡센 코딩 아지트. 너도 할 수 있어, 빡코딩."</p>
+    
+    <div class="timer-container animate-on-scroll">
+        <p class="timer-label">2기 서류 접수 마감까지</p>
+        <div id="countdown">
+            <div class="time-unit"><span id="days">00</span><small>일</small></div>
+            <div class="time-unit"><span id="hours">00</span><small>시</small></div>
+            <div class="time-unit"><span id="minutes">00</span><small>분</small></div>
+            <div class="time-unit"><span id="seconds">00</span><small>초</small></div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <a href="https://forms.gle/tUo5dz2x2vFnc81F6" class="btn btn-primary" target="_blank">🔥 지금 바로 합류하기</a>
+        <a href="https://exciting-leo-937.notion.site/2-9e5399fb98f4823697dc810e45b40b53" class="btn btn-outline" target="_blank">📄 활동기록 보기</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="section-title animate-on-scroll">스터디 소개</div>
+    <div class="card animate-on-scroll" style="margin-bottom: 60px;">
+        <p style="font-size: 1.2rem; margin: 0;">
+            혼자 하면 금방 지치는 코딩, <span class="highlight">빡코딩</span>에서 함께라면 끝까지 갈 수 있습니다.<br>
+            서울 지역 대학생들이 모여 <span class="highlight">단기간 실력 향상</span>을 목표로 빡세게 달립니다. 전공자, 비전공자 모두 환영합니다!
+        </p>
+    </div>
+
+    <div class="section-title animate-on-scroll">운영 및 진행 방식</div>
+    <div class="grid">
+        <div class="card animate-on-scroll">
+            <h3>📍 일정 및 장소</h3>
+            <p>• <strong>일정:</strong> 주 1-2회 대면 스터디 (팀별 협의)</p>
+            <p>• <strong>장소:</strong> 서울 내 카페, 스터디룸 등 자유 협의</p>
+        </div>
+        <div class="card animate-on-scroll">
+            <h3>⏰ 빡센 집중 프로세스</h3>
+            <p>• <strong>Focus Session:</strong> 50분 집중 코딩 / 10분 휴식 (뽀모도로 기법 활용)</p>
+            <p>• <strong>Wrap-up:</strong> 목표 달성률 공유 및 막혔던 코드 질문/토론</p>
+        </div>
+    </div>
+
+    <div class="section-title animate-on-scroll">이런 분을 찾습니다</div>
+    <div class="grid">
+        <div class="card animate-on-scroll">
+            <h3>🚀 목표 지향형</h3>
+            <p>한 달 안에 개인 프로젝트나 특정 기술 스택(React, Python, Java 등) 공부를 반드시 끝내고 싶은 분</p>
+        </div>
+        <div class="card animate-on-scroll">
+            <h3>🤝 성장 공유형</h3>
+            <p>혼자 공부할 때보다 남에게 설명하면서 개념을 더 확실히 내 것으로 만들고 싶은 분</p>
+        </div>
+    </div>
+
+    <div class="section-title animate-on-scroll">1기 팀원들의 생생 후기</div>
+    <div class="grid animate-on-scroll">
+        <div class="card testimonial-card">
+            <div class="profile">
+                <div class="avatar">K</div>
+                <div>
+                    <span class="name">김OO (컴퓨터공학 전공)</span>
+                    <span class="tag">#React #개인프로젝트완성</span>
+                </div>
+            </div>
+            <p class="comment">"혼자 할 때는 한 달 넘게 붙잡고 있던 투두리스트 앱을 여기 와서 2주 만에 끝냈습니다. 50분 집중 시간이 정말 마법 같아요."</p>
+        </div>
+
+        <div class="card testimonial-card">
+            <div class="profile">
+                <div class="avatar">이</div>
+                <div>
+                    <span class="name">이OO (경영학 비전공)</span>
+                    <span class="tag">#Python #기초탈출</span>
+                </div>
+            </div>
+            <p class="comment">"비전공자라 걱정했는데, 쉬는 시간에 팀원들과 코드 리뷰하면서 정말 많이 배웠습니다. 눈치 안 보고 질문할 수 있는 분위기가 최고예요!"</p>
+        </div>
+
+        <div class="card testimonial-card">
+            <div class="profile">
+                <div class="avatar">박</div>
+                <div>
+                    <span class="name">박OO (전자공학 전공)</span>
+                    <span class="tag">#Java #취준생</span>
+                </div>
+            </div>
+            <p class="comment">"매주 달성률을 공유하니까 나태해질 틈이 없어요. '빡코딩'이라는 이름처럼 인생에서 가장 밀도 있게 코딩했던 한 달이었습니다."</p>
+        </div>
+    </div>
+
+    <div class="section-title animate-on-scroll">빡코딩 현장 & 프로젝트 인증</div>
+    <div class="gallery-grid animate-on-scroll">
+        <div class="gallery-item">
+            <img src="{% static 'study/gallery1.jpg' %}" alt="강남 스터디룸 집중 코딩 현장">
+            <div class="gallery-overlay">
+                <span class="gallery-tag">#현장스케치</span>
+                <h3>강남 아지트 1기 집중 세션</h3>
+                <p>열기로 가득 찬 50분 집중 코딩 시간</p>
+            </div>
+        </div>
+
+        <div class="gallery-item">
+            <img src="{% static 'study/gallery2.jpg' %}" alt="React 팀 프로젝트 완성 스크린샷">
+            <div class="gallery-overlay">
+                <span class="gallery-tag">#프로젝트인증</span>
+                <h3>'오늘의 코딩' 앱 완성</h3>
+                <p>비전공자 팀원이 4주 만에 구현한 React 앱</p>
+            </div>
+        </div>
+
+        <div class="gallery-item">
+            <img src="{% static 'study/gallery3.jpg' %}" alt="쉬는 시간 멘토링 및 코드 리뷰">
+            <div class="gallery-overlay">
+                <span class="gallery-tag">#네트워킹</span>
+                <h3>쉬는 시간 기습 코드 리뷰</h3>
+                <p>막혔던 로직을 팀원들과 함께 해결하는 순간</p>
+            </div>
+        </div>
+
+        <div class="gallery-item">
+            <img src="{% static 'study/gallery4.jpg' %}" alt="1기 최종 프로젝트 발표회 및 수료식">
+            <div class="gallery-overlay">
+                <span class="gallery-tag">#수료식</span>
+                <h3>1기 최종 데모데이</h3>
+                <p>한 달간의 빡센 노력이 결실을 맺는 날</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-box animate-on-scroll">
+        <h3>⛔ 주의사항 (필독)</h3>
+        <ul class="warning-list">
+            <li>무단 불참 3회 이상 시 <strong>강제 탈퇴</strong> 조치됩니다.</li>
+            <li>집중 시간에는 코딩 및 기술 문서 열람에만 전념해야 합니다. (게임/SNS 절대 금지)</li>
+            <li>질문은 단톡방에 먼저! 깊은 토론은 쉬는 시간에 함께 나눠주세요.</li>
+        </ul>
+    </div>
+</div>
+
+<footer>
+    <p>‼️ 본 스터디는 연합 대학스터디로 종교/정치/특정 단체와는 일절 관련이 없습니다 ‼️</p>
+    <p>© 2026 빡코딩 스터디. Design Your Logic.</p>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const targets = document.querySelectorAll(".animate-on-scroll");
+
+        const options = {
+            root: null, // 뷰포트를 기준으로 감지
+            rootMargin: "0px", // 여백 없음
+            threshold: 0.2 // 요소의 20%가 화면에 들어왔을 때 발동
+        };
+
+        const observer = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("appear"); // 클래스 추가
+                    observer.unobserve(entry.target); // 한 번 발동하면 감지 중지
+                }
+            });
+        }, options);
+
+        targets.forEach(target => {
+            observer.observe(target); // 각 요소 감지 시작
+        });
+    });
+
+    function updateTimer() {
+        // 목표 날짜 설정 (연, 월-1, 일, 시, 분, 초)
+        const targetDate = new Date(2026, 3, 28, 23, 59, 59).getTime(); 
+        const now = new Date().getTime();
+        const difference = targetDate - now;
+
+        if (difference > 0) {
+            const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = m.innerText = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = s.toString().padStart(2, '0');
+        } else {
+            document.querySelector(".timer-container").innerHTML = "<p class='highlight'>2기 모집이 마감되었습니다. 다음 기수를 기다려주세요!</p>";
+        }
+    }
+
+    // 1초마다 업데이트
+    setInterval(updateTimer, 1000);
+    updateTimer(); // 페이지 로드 시 즉시 실행
+
+</script>
+
+</body>
+</html>
